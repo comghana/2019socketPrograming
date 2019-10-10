@@ -48,10 +48,16 @@ int main(){
 		while(1){
 			n = read(c_socket, rcvBuffer, sizeof(rcvBuffer));
 			printf("rcvBuffer: %s\n", rcvBuffer);
-			if(!strncmp(rcvBuffer, "hello", 4))
+			if(!strncmp(rcvBuffer, "hello", 5))
 				write(c_socket, "Hello, Nice meet you", 20);
-			if(strncasecmp(rcvBuffer, "quit", 4) == 0 || strncasecmp(rcvBuffer, "kill server", 11) == 0)
+			else if(!strncmp(rcvBuffer, "What is your name?",18))
+				write(c_socket, "My name is Jieun Jang", 21);
+ 			else if(!strncmp(rcvBuffer, "How old are you?", 15))
+				write(c_socket, "I`m 23", 6);
+			else if(strncasecmp(rcvBuffer, "quit", 4) == 0 || strncasecmp(rcvBuffer, "kill server", 11) == 0)
 				break;
+			else
+				write(c_socket, "You write wrong, Try again!",27);
 			//write(c_socket, rcvBuffer, n); 클라이언트에게 buffer의 내용을 전송함
 		}
 
