@@ -7,6 +7,34 @@
 
 char buffer[100] = "Hi, I'm server.\n";
 char rcvBuffer[100];
+
+char * delsp(char * dest, char * cmd) {
+	int n = 0;
+	while (* dest == ' ' || *cmd == ' ') {
+		n++;
+		dest++;
+		cmd++;
+	}
+	while(*dest!='\0' && *cmd != '\0'&& *dest == *cmd) {
+		n++;
+		dest++;
+		cmd++;
+	}
+	return dest;
+}
+
+int cmp(char *str) {
+	int result;
+	char * t1 = strtok(str, " ");
+	str = strtok(NULL, "\n");
+	result = strcmp(t1, str);
+	return result;
+}
+
+
+//죄송합니다 교수님....두 함수는 긁어왔습니다 하하하
+
+
 int main(){
 	int c_socket, s_socket;
 	struct sockaddr_in s_addr, c_addr;
@@ -54,6 +82,16 @@ int main(){
 				write(c_socket, "My name is Jieun Jang", 21);
  			else if(!strncmp(rcvBuffer, "How old are you?", 15))
 				write(c_socket, "I`m 23", 6);
+			else if(!strncmp(rcvBuffer, "strlen", 6)) {
+				char *rB = delsp(rcvBuffer, "strlen");
+				write(c_socket, rB, strlen(rB)-1);
+			}
+			else if(!strncmp(rcvBuffer, "strcmp", 6)) {
+				char *rB = delsp(rcvBuffer, "strcmp");
+				int result = cmp(rB);
+				sprintf(rB, "%d\n", result);
+				write(c_socket, rB, strlen(rB));
+			} 
 			else if(strncasecmp(rcvBuffer, "quit", 4) == 0 || strncasecmp(rcvBuffer, "kill server", 11) == 0)
 				break;
 			else
@@ -68,3 +106,4 @@ int main(){
 	close(s_socket);
 	return 0;	
 }
+
