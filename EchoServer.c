@@ -84,7 +84,10 @@ int main(){
 				write(c_socket, "I`m 23", 6);
 			else if(!strncmp(rcvBuffer, "strlen", 6)) {
 				char *rB = delsp(rcvBuffer, "strlen");
-				write(c_socket, rB, strlen(rB)-1);
+				char temp[100];
+				sprintf(temp, "%d\n", strlen(rB)-2);
+				strcpy(rB, temp);
+				write(c_socket, rB, strlen(rB));
 			}
 			else if(!strncmp(rcvBuffer, "strcmp", 6)) {
 				char *rB = delsp(rcvBuffer, "strcmp");
