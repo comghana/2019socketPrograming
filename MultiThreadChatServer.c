@@ -26,8 +26,8 @@ pthread_t th;
 pthread_mutex_t mutex;
 
 user listClient[MAX_CLIENT];
-char greeting[] = "[NOTICE] Welcome to chatting room\n";
-char CODE200[] = "[NOTICE] Sorry No More Connection\n";
+char greeting[] = "Welcome to chatting room\n";
+char CODE200[] = "Sorry No More Connection\n";
 
 int main(int argc, int *argv[]){
 	int c_socket, s_socket;
@@ -45,10 +45,10 @@ int main(int argc, int *argv[]){
 	s_addr.sin_port = htons(PORT);
 
 	if(bind(s_socket, (struct sockaddr *) &s_addr, sizeof(s_addr))==-1){
-		printf("[ERROR] Can not bind.\n");
+		printf("Can not bind.\n");
 	}
 	if(listen(s_socket, 5)==-1){
-		printf("[ERROR] Listen fail.\n");
+		printf("Listen fail.\n");
 	}
 
 	for(i=0; i<MAX_CLIENT; i++){
@@ -72,7 +72,7 @@ int main(int argc, int *argv[]){
 void *doChat(void *arg){
 	int c_socket = *((int *)arg);
 	char nickname[20];
-	char room[20] = "all";
+	char room[20] = "first";
 	char chatData[CHATDATA];
 	char writeData[CHATDATA];
 	int i, n;
@@ -83,43 +83,29 @@ void *doChat(void *arg){
 			strcpy(nickname, listClient[i].nickname);
 		}
 	}
-	while(1){
+	while(1) {
 		memset(chatData, 0, sizeof(chatData));
-		if((n = read(c_socket, chatData, sizeof(chatData)))>0){
-			sprintf(writeData, "[대화방:%s] %s : %s", room, nickname, chatData);
-			if(strstr(chatData, "/exit") != NULL){
+		if((n = read(c_socket, chatData, sizeof(chatData))) > 0) {
+			sprintf(writeData, "대화방:%s : [%s] %s", room, nickname, chatData);
+			if(strstr(chatData, "exit") != NULL){
 				popClient(c_socket);
 				break;
-			}
-			else if(strncasecmp(chatData, "/help", 5)==0){
-				sprintf(writeData, "===도움말===\n  /list  ----- 접속자 보기\n  /w [닉네임] [내용] ----- 귓속말 하기\n  /join [방이름] ----- 대화방 들어가기(기본 대화방 : all)\n  /exit ----- 접속 종료하기\n");
-				write(c_socket, writeData, strlen(writeData));
-			}
-			else if(strncasecmp(chatData, "/list", 5)==0){
-				sprintf(writeData, "===접속자 명단===\n");
-				write(c_socket, writeData, strlen(writeData));
-				for(i=0; i<MAX_CLIENT; i++){
-					if(listClient[i].c_socket!=INVALID_SOCK){
-						sprintf(writeData, "[%s] 참여중인 대화방 : %s\n", listClient[i].nickname, listClient[i].room);
-						write(c_socket, writeData, strlen(writeData));
-					}
-				}
 			}
 			else if(strncasecmp(chatData, "/w", 2)==0){
 				strtok(chatData, " ");
 				strcpy(target, strtok(NULL, " "));
 				strcpy(chatData, strtok(NULL, "\0"));
-				sprintf(writeData, "[%s님의 귓속말] %s", nickname, chatData);
+				sprintf(writeData, "[%s] %s", nickname, chatData);
 				for(i=0; i<MAX_CLIENT; i++){
 					if(strcasecmp(target, listClient[i].nickname)==0){
 						write(listClient[i].c_socket, writeData, strlen(writeData));
 					}
 				}
 			}
-			else if(strncasecmp(chatData, "/join", 5)==0){
+			else if(strncasecmp(chatData, "/room", 5)==0){
 				strtok(chatData, " ");
 				strcpy(room, strtok(NULL, "\n"));
-				sprintf(writeData, "[%s 님이 %s방에 입장하였습니다. (전체방으로 돌아가기 : /join all)]\n", nickname, room);
+				sprintf(writeData, "%s님이 %s방에 입장하였습니다.\n", nickname, room);
 				for(i=0; i<MAX_CLIENT; i++){
 					if(listClient[i].c_socket==c_socket){
 						strcpy(listClient[i].room, room);
@@ -157,9 +143,9 @@ int pushClient(int c_socket){
 			memset(listClient[i].nickname, 0, sizeof(listClient[i].nickname));
 			strcpy(listClient[i].nickname, buf);
 			memset(listClient[i].room, 0, sizeof(listClient[i].room));
-			strcpy(listClient[i].room, "all");
+			strcpy(listClient[i].room, "first");
 
-			sprintf(writeData, "[%s]님께서 채팅방 프로그램에 접속하셨습니다.! (도움말 /help)\n", buf);
+			sprintf(writeData, "%s님께서 채팅방에 접속하셨습니다.\n", buf);
 			for(j=0; j<MAX_CLIENT; j++){
 				if(listClient[j].c_socket!=INVALID_SOCK){
 				write(listClient[j].c_socket, writeData, strlen(writeData));
@@ -177,7 +163,7 @@ int popClient(int c_socket){
 	char writeData[CHATDATA];
 	for(i=0; i<MAX_CLIENT; i++){
 		if(listClient[i].c_socket==c_socket){
-			sprintf(writeData, "[%s]님께서 채팅 프로그램 접속을 종료하셨습니다!\n", listClient[i].nickname);
+			sprintf(writeData, "%s님께서 채팅을 종료하셨습니다!\n", listClient[i].nickname);
 			for(j=0; j<MAX_CLIENT; j++){
 				if(listClient[j].c_socket!=INVALID_SOCK){
 					write(listClient[j].c_socket, writeData, strlen(writeData));
